@@ -110,45 +110,66 @@ function fromJSON(proto, json) {
 
 const cssSelectorBuilder = {
   res: '',
+  checkDouble(name) {
+    if (this.index > name) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    if (this.index === name && (name === 1 || name === 2 || name === 6)) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+  },
   element(value) {
     const obj = Object.create(cssSelectorBuilder);
+    obj.index = 1;
     obj.res = `${this.res}${value}`;
+    this.checkDouble(obj.index);
     return obj;
   },
 
   id(value) {
     const obj = Object.create(cssSelectorBuilder);
     obj.res = `${this.res}#${value}`;
+    obj.index = 2;
+    this.checkDouble(obj.index);
     return obj;
   },
 
   class(value) {
     const obj = Object.create(cssSelectorBuilder);
+    obj.index = 3;
     obj.res = `${this.res}.${value}`;
+    this.checkDouble(obj.index);
     return obj;
   },
 
   attr(value) {
     const obj = Object.create(cssSelectorBuilder);
+    obj.index = 4;
     obj.res = `${this.res}[${value}]`;
+    this.checkDouble(obj.index);
     return obj;
   },
 
   pseudoClass(value) {
     const obj = Object.create(cssSelectorBuilder);
     obj.res = `${this.res}:${value}`;
+    obj.index = 5;
+    this.checkDouble(obj.index);
     return obj;
   },
 
   pseudoElement(value) {
     const obj = Object.create(cssSelectorBuilder);
     obj.res = `${this.res}::${value}`;
+    obj.index = 6;
+    this.checkDouble(obj.index);
     return obj;
   },
 
   combine(selector1, combinator, selector2) {
     const obj = Object.create(cssSelectorBuilder);
     obj.res = `${selector1.res} ${combinator} ${selector2.res}`;
+    this.checkDouble(obj.index);
     return obj;
   },
   stringify() {
